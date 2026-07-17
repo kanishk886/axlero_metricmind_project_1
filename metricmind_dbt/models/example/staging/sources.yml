@@ -1,0 +1,10 @@
+version: 2
+
+sources:
+  - name: global_superstore_source
+    database: METRICMIND_DB
+    schema: PUBLIC
+
+    tables:
+      - name: GLOBAL_SUPERSTORE
+        description: Raw Global Superstore dataset loaded into Snowflake
