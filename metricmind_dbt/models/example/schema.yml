@@ -1,21 +1,34 @@
 
+    
 version: 2
 
 models:
-  - name: my_first_dbt_model
-    description: "A starter dbt model"
+  - name: stg_global_superstore
+    description: Cleaned staging model for the Global Superstore dataset
+
     columns:
-      - name: id
-        description: "The primary key for this table"
-        data_tests:
+      - name: row_id
+        tests:
           - unique
           - not_null
 
-  - name: my_second_dbt_model
-    description: "A starter dbt model"
-    columns:
-      - name: id
-        description: "The primary key for this table"
-        data_tests:
-          - unique
+      - name: order_id
+        tests:
           - not_null
+
+      - name: order_date
+        tests:
+          - not_null
+
+      - name: sales
+        tests:
+          - not_null
+
+      - name: category
+        tests:
+          - not_null
+          - accepted_values:
+              values:
+                - Furniture
+                - Office Supplies
+                - Technology
