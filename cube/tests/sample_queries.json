@@ -1,0 +1,58 @@
+{
+  "queries": [
+    {
+      "name": "Total Sales",
+      "query": {
+        "measures": ["sales.total_sales"]
+      }
+    },
+    {
+      "name": "Sales by Region",
+      "query": {
+        "measures": ["sales.total_sales"],
+        "dimensions": ["sales.region"],
+        "order": {
+          "sales.total_sales": "desc"
+        }
+      }
+    },
+    {
+      "name": "European Sales",
+      "query": {
+        "measures": ["sales.total_sales"],
+        "filters": [
+          {
+            "member": "sales.region",
+            "operator": "equals",
+            "values": ["Europe"]
+          }
+        ]
+      }
+    },
+    {
+      "name": "Quarterly Sales",
+      "query": {
+        "measures": ["sales.total_sales"],
+        "timeDimensions": [
+          {
+            "dimension": "sales.order_date",
+            "granularity": "quarter"
+          }
+        ],
+        "order": {
+          "sales.order_date": "asc"
+        }
+      }
+    },
+    {
+      "name": "Profit by Category",
+      "query": {
+        "measures": ["sales.total_profit"],
+        "dimensions": ["sales.category"],
+        "order": {
+          "sales.total_profit": "desc"
+        }
+      }
+    }
+  ]
+}

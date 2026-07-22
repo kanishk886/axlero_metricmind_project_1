@@ -1,0 +1,120 @@
+cubes:
+  - name: sales
+    description: Governed sales semantic model based on the dbt FCT_SALES model
+
+    sql: |
+      SELECT *
+      FROM METRICMIND_DB.PUBLIC.FCT_SALES
+
+    measures:
+      - name: total_sales
+        description: Total revenue generated from sales
+        sql: sales
+        type: sum
+        format: currency
+
+      - name: total_profit
+        description: Total profit earned
+        sql: profit
+        type: sum
+        format: currency
+
+      - name: estimated_cost
+        description: Estimated cost calculated as sales minus profit
+        sql: estimated_cost
+        type: sum
+        format: currency
+
+      - name: total_shipping_cost
+        description: Total shipping cost
+        sql: shipping_cost
+        type: sum
+        format: currency
+
+      - name: total_quantity
+        description: Total quantity of products sold
+        sql: quantity
+        type: sum
+
+      - name: average_discount
+        description: Average discount applied to transactions
+        sql: discount
+        type: avg
+        format: percent
+
+      - name: order_count
+        description: Number of distinct customer orders
+        sql: order_id
+        type: count_distinct
+
+      - name: customer_count
+        description: Number of distinct customers
+        sql: customer_id
+        type: count_distinct
+
+      - name: profit_margin_percentage
+        description: Profit as a percentage of total sales
+        sql: |
+          100.0 * {total_profit} / NULLIF({total_sales}, 0)
+        type: number
+        format: percent
+
+    dimensions:
+      - name: row_id
+        description: Unique identifier for each sales record
+        sql: row_id
+        type: number
+        primary_key: true
+
+      - name: order_id
+        description: Unique identifier for an order
+        sql: order_id
+        type: string
+
+      - name: order_date
+        description: Date on which the order was placed
+        sql: order_date
+        type: time
+
+      - name: ship_date
+        description: Date on which the order was shipped
+        sql: ship_date
+        type: time
+
+      - name: customer_id
+        description: Unique customer identifier
+        sql: customer_id
+        type: string
+
+      - name: product_id
+        description: Unique product identifier
+        sql: product_id
+        type: string
+
+      - name: city
+        sql: city
+        type: string
+
+      - name: state
+        sql: state
+        type: string
+
+      - name: country
+        sql: country
+        type: string
+
+      - name: region
+        sql: region
+        type: string
+
+      - name: market
+        sql: market
+        type: string
+
+      - name: category
+        sql: category
+        type: string
+
+      - name: sub_category
+        sql: sub_category
+        type: string

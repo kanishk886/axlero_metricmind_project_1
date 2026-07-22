@@ -224,3 +224,11 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Cube
+cube/.env
+cube/.cubestore/
+
+# Cube
+cube/.env
+cube/.cubestore/
