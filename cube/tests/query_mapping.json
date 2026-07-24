@@ -1,0 +1,25 @@
+{
+  "mappings": [
+    {
+      "question": "Show total sales",
+      "measure": "total_sales",
+      "dimension": null
+    },
+    {
+      "question": "Show sales by category",
+      "measure": "total_sales",
+      "dimension": "category"
+    },
+    {
+      "question": "Show quarterly revenue",
+      "measure": "total_sales",
+      "dimension": "order_date",
+      "granularity": "quarter"
+    },
+    {
+      "question": "Show customer count",
+      "measure": "customer_count",
+      "dimension": null
+    }
+  ]
+}
