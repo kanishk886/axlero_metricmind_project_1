@@ -8,12 +8,14 @@ APPROVED_MEASURES = {
     "order_count": "Distinct number of orders",
     "customer_count": "Distinct number of customers",
     "profit_margin_percentage": "Profit as a percentage of sales",
+    "average_sales": "Average sales amount",
 }
 
 
 APPROVED_DIMENSIONS = {
     "order_date": "Date on which an order was placed",
     "region": "Sales region",
+    "segment": "Customer segment",
     "market": "Sales market",
     "country": "Customer country",
     "state": "Customer state",
@@ -24,6 +26,7 @@ APPROVED_DIMENSIONS = {
     "customer_name": "Customer name",
     "product_id": "Unique product identifier",
     "product_name": "Product name",
+    "ship_mode": "Shipping mode",
 }
 
 
