@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------
+   Base reset & body
+--------------------------------------------------------------- */
+body {
+  background-color: #f3f4f6; /* light gray page background */
+  color: #111827;
+  font-family: var(--font-geist-sans), sans-serif;
+}
+
+/* ---------------------------------------------------------------
+   Scrollbar (optional subtle style)
+--------------------------------------------------------------- */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
