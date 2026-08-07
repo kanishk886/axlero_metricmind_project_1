@@ -88,9 +88,6 @@ The dataset contains information related to:
 - Next.js
 - Tremor
 
-### Visualization
-- Apache ECharts
-
 ### Data Format
 - JSON
 - YAML
@@ -99,19 +96,76 @@ The dataset contains information related to:
 
 ## Project Architecture
 
-Global Superstore Dataset
-        ↓
-Snowflake Data Warehouse
-        ↓
-dbt Data Modeling
-        ↓
-Cube.dev Semantic Layer
-        ↓
-LangChain + Llama 3
-        ↓
-Next.js + Tremor
-        ↓
-Apache ECharts Dashboard
+                         METRICMIND ARCHITECTURE
+
+                              USER
+                    (Asks business question)
+                               │
+                               ▼
+                     FRONTEND DASHBOARD
+              (Query input + displays results)
+                 [Frontend React files]
+                               │
+                         "Run Query"
+                               ▼
+                       FASTAPI BACKEND
+               (Receives and processes query)
+                     [backend/main.py]
+                               │
+                               ▼
+                  LANGCHAIN QUERY PLANNER
+             (Converts question to semantic query)
+                  [agent/query_planner.py]
+                               │
+                               ▼
+                    LLAMA 3.2 + OLLAMA
+                (Understands natural language)
+               [Used via query_planner.py]
+                               │
+                               ▼
+                    SEMANTIC VALIDATION
+            (Checks allowed measures/dimensions)
+                [agent/semantic_schema.py]
+                [agent/config.py]
+                               │
+                               ▼
+                     SEMANTIC LAYER
+             (Business metrics + dimensions)
+                  [cube/model/cubes/Sales.yml]
+                               │
+                               ▼
+                         DBT LAYER
+              (Cleans + transforms raw data)
+                [metricmind_dbt/models/]
+                               │
+                               ▼
+                    SNOWFLAKE DATABASE
+                (Stores analytical dataset)
+                   [METRICMIND_DB]
+                               │
+                               ▼
+                     QUERY EXECUTION
+                 (Executes validated query)
+                    [Backend service]
+                               │
+                               ▼
+                       JSON RESPONSE
+               (Returns structured results)
+                     [backend/main.py]
+                               │
+                               ▼
+                     FRONTEND RESULTS
+         (Displays output in different formats)
+                               │
+          ┌────────────────────┼────────────────────┐
+          ▼                    ▼                    ▼
+       RESULTS            SEMANTIC QUERY       CUBE QUERY
+    (Data table)          (AI query plan)      (API format)
+
+                               │
+                               ▼
+                        GENERATED SQL
+                     (Executed SQL view)
 
 ---
 
