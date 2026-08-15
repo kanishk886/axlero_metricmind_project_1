@@ -22,10 +22,12 @@ import Navbar from "@/components/navbar/Navbar";
 import QueryInput from "@/components/query/QueryInput";
 import LoadingState from "@/components/query/LoadingState";
 import KPICard, { deriveKPICards } from "@/components/kpi/KPICard";
+import ChartVisualization from "@/components/chart/ChartVisualization";
 import DynamicChart from "@/components/chart/DynamicChart";
 import QueryTabs from "@/components/results/QueryTabs";
 import QueryHistory from "@/components/history/QueryHistory";
 import QueryAnalysis from "@/components/analysis/QueryAnalysis";
+import AIInsightsPanel from "@/components/dashboard/AIInsightsPanel";
 import EmptyState from "@/components/shared/EmptyState";
 import ErrorState from "@/components/shared/ErrorState";
 
@@ -86,7 +88,8 @@ export default function DashboardPage() {
   const [data, setData] = useState<QueryResponse | null>(null);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [selectedHistoryId, setSelectedHistoryId] = useState<string | null>(null);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [queryTime, setQueryTime] = useState<number | null>(null);
+  const [executedAt, setExecutedAt] = useState<Date | null>(null);
 
   // Load history from localStorage on mount
   useEffect(() => {
@@ -108,11 +111,15 @@ export default function DashboardPage() {
     setData(null);
     setSelectedHistoryId(null);
     setActivePage("dashboard");
+    const t0 = Date.now();
 
     try {
       // ↓ This is the EXACT same call as the original page.tsx — no changes
       const result = await runQuery(trimmed);
+      const elapsed = (Date.now() - t0) / 1000;
       setData(result);
+      setQueryTime(elapsed);
+      setExecutedAt(new Date());
 
       // Save to history
       const entry = saveQuery(user.id, {
@@ -199,10 +206,12 @@ export default function DashboardPage() {
         <main style={{ flex: 1, overflow: "auto", padding: "0" }}>
 
           {/* ══════════════════════════════════════════════
-              DASHBOARD / ASK-AI page
+              DASHBOARD page — 3 column layout when results exist
           ══════════════════════════════════════════════ */}
           {activePage === "dashboard" && (
-            <div style={{ padding: "24px", maxWidth: 1280, margin: "0 auto" }}>
+            <div style={{ display: "flex", height: "calc(100vh - 64px)", overflow: "hidden" }}>
+              <div style={{ flex: 1, overflowY: "auto", minWidth: 0 }}>
+            <div style={{ padding: "24px", maxWidth: 1040, margin: "0 auto" }}>
 
               {/* Query Input */}
               <QueryInput
@@ -261,9 +270,13 @@ export default function DashboardPage() {
                     </div>
                   )}
 
-                  {/* Chart */}
+                  {/* Chart with type selector */}
                   {results.length > 0 && (
-                    <DynamicChart results={results} />
+                    <ChartVisualization
+                      results={results}
+                      semanticQuery={data.semantic_query}
+                      question={question}
+                    />
                   )}
 
                   {/* Query Tabs */}
@@ -288,6 +301,28 @@ export default function DashboardPage() {
                 <div style={{ marginTop: 20 }}>
                   <EmptyState onSelect={(s) => { setQuestion(s); }} />
                 </div>
+              )}
+              </div>
+              </div>
+              {/* Right: AI Insights Panel — shown when results available */}
+              {data && !loading && (
+                <AIInsightsPanel
+                  question={question}
+                  data={data}
+                  queryTime={queryTime}
+                  executedAt={executedAt}
+                  onNavigateAnalysis={() => setActivePage("analysis")}
+                  onDownloadCSV={() => {
+                    if (results.length === 0) return;
+                    const headers = Object.keys(results[0]);
+                    const rows = results.map((r) => headers.map((h) => JSON.stringify(r[h] ?? "")).join(","));
+                    const csv = [headers.join(","), ...rows].join("\n");
+                    const blob = new Blob([csv], { type: "text/csv" });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a"); a.href = url; a.download = "metricmind_results.csv"; a.click();
+                    URL.revokeObjectURL(url);
+                  }}
+                />
               )}
             </div>
           )}
@@ -346,7 +381,13 @@ export default function DashboardPage() {
                     )}
 
                     {/* Chart */}
-                    {results.length > 0 && <DynamicChart results={results} />}
+                    {results.length > 0 && (
+                      <DynamicChart
+                        results={results}
+                        semanticQuery={data.semantic_query}
+                        question={question}
+                      />
+                    )}
 
                     {/* Tabs */}
                     <QueryTabs data={data} />
@@ -366,7 +407,7 @@ export default function DashboardPage() {
               ANALYSIS page
           ══════════════════════════════════════════════ */}
           {activePage === "analysis" && (
-            <div style={{ padding: "24px", maxWidth: 900, margin: "0 auto" }}>
+            <div style={{ padding: "24px", maxWidth: 1100, margin: "0 auto" }}>
               {data ? (
                 <QueryAnalysis question={question} data={data} />
               ) : (
