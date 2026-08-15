@@ -8,7 +8,6 @@ const SUGGESTIONS = [
   "Show total sales for Africa",
   "Show average sales by segment",
   "Show total sales by ship mode",
-  "Show top 5 regions by profit",
 ];
 
 interface SuggestionChipsProps {

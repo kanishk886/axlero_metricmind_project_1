@@ -3,13 +3,11 @@
 import React from "react";
 import DynamicChart from "@/components/chart/DynamicChart";
 import {
-  generateInsights,
   generateKPISummary,
   generateResultSummary,
   formatNumber,
   getChartType,
   getChartConfig,
-  type Insight,
 } from "@/lib/insights";
 import type { QueryResponse } from "@/lib/api";
 
@@ -241,127 +239,13 @@ function KPISummarySection({ results, semanticQuery }: {
   );
 }
 
-// ── Key Insights ──────────────────────────────────────────────────────────────
 
-const INSIGHT_CONFIG: Record<Insight["type"], { bg: string; border: string; dot: string; numBg: string; numText: string }> = {
-  positive: {
-    bg: "rgba(22,163,74,0.06)",
-    border: "rgba(22,163,74,0.18)",
-    dot: "#16A34A",
-    numBg: "rgba(22,163,74,0.12)",
-    numText: "#16A34A",
-  },
-  neutral: {
-    bg: "var(--color-surface-2)",
-    border: "var(--color-border)",
-    dot: "#0EA5E9",
-    numBg: "rgba(14,165,233,0.1)",
-    numText: "#0EA5E9",
-  },
-  info: {
-    bg: "transparent",
-    border: "var(--color-border)",
-    dot: "#64748B",
-    numBg: "var(--color-surface-3)",
-    numText: "var(--color-text-muted)",
-  },
-  warning: {
-    bg: "rgba(239,68,68,0.04)",
-    border: "rgba(239,68,68,0.18)",
-    dot: "#EF4444",
-    numBg: "rgba(239,68,68,0.1)",
-    numText: "#EF4444",
-  },
-};
-
-function InsightRow({ insight, index }: { insight: Insight; index: number }) {
-  const c = INSIGHT_CONFIG[insight.type];
-  return (
-    <div style={{
-      display: "flex",
-      alignItems: "flex-start",
-      gap: 12,
-      padding: "12px 16px",
-      background: c.bg,
-      border: `1px solid ${c.border}`,
-      borderRadius: 10,
-      transition: "transform 150ms",
-    }}>
-      {/* Number badge */}
-      <div style={{
-        width: 24,
-        height: 24,
-        borderRadius: "50%",
-        background: c.numBg,
-        color: c.numText,
-        fontSize: 11,
-        fontWeight: 700,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        flexShrink: 0,
-        marginTop: 1,
-      }}>
-        {index + 1}
-      </div>
-      <p style={{ fontSize: 14, color: "var(--color-text)", lineHeight: 1.6, margin: 0, fontWeight: 400 }}>
-        {insight.text}
-      </p>
-    </div>
-  );
-}
-
-function KeyInsightsSection({ insights }: { insights: Insight[] }) {
-  return (
-    <Card>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
-        <SectionLabel>Key Insights</SectionLabel>
-        <span style={{
-          padding: "2px 8px",
-          borderRadius: 10,
-          background: "var(--color-primary-light)",
-          color: "var(--color-primary)",
-          fontSize: 11,
-          fontWeight: 700,
-          marginTop: -14,
-          marginLeft: 2,
-        }}>
-          {insights.length}
-        </span>
-      </div>
-
-      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        {insights.map((insight, i) => (
-          <InsightRow key={i} insight={insight} index={i} />
-        ))}
-      </div>
-
-      <div style={{
-        marginTop: 16,
-        padding: "8px 12px",
-        background: "var(--color-surface-2)",
-        borderRadius: 8,
-        fontSize: 11.5,
-        color: "var(--color-text-muted)",
-        display: "flex",
-        alignItems: "center",
-        gap: 7,
-      }}>
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
-        </svg>
-        All insights are computed directly from the returned query results — no AI assumptions or hallucinations.
-      </div>
-    </Card>
-  );
-}
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function QueryAnalysis({ question, data }: QueryAnalysisProps) {
   const { semantic_query, results } = data;
 
-  const insights = generateInsights(question, semantic_query, results);
   const summary = generateResultSummary(question, semantic_query, results);
   const chartType = getChartType(results, semantic_query);
   const chartConfig = getChartConfig(results);
@@ -438,9 +322,6 @@ export default function QueryAnalysis({ question, data }: QueryAnalysisProps) {
           </div>
         </div>
       )}
-
-      {/* ── Key Insights ── */}
-      <KeyInsightsSection insights={insights} />
 
     </div>
   );
