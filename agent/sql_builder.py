@@ -9,29 +9,51 @@ MEASURE_SQL = {
     "total_profit": "SUM(PROFIT)",
     "total_quantity": "SUM(QUANTITY)",
     "average_sales": "AVG(SALES)",
-    "order_count": "COUNT(DISTINCT ORDER_ID)",
+    "estimated_cost": "SUM(SALES) - SUM(PROFIT)",
+    "total_shipping_cost": 'SUM("Shipping.Cost")',
+    "average_discount": "AVG(DISCOUNT)",
+    "order_count": 'COUNT(DISTINCT "Order.ID")',
+    "customer_count": 'COUNT(DISTINCT "Customer.ID")',
+    "profit_margin_percentage": (
+        "100.0 * SUM(PROFIT) / NULLIF(SUM(SALES), 0)"
+    ),
 }
 
 
 DIMENSION_SQL = {
     "region": "REGION",
     "country": "COUNTRY",
-    "market":"MARKET",
+    "market": "MARKET",
     "category": "CATEGORY",
     "sub_category": "SUB_CATEGORY",
     "segment": "SEGMENT",
-    "ship_mode": "SHIP_MODE",
-    "order_date": "ORDER_DATE",
+    "ship_mode": '"Ship.Mode"',
+    "order_date": '"Order.Date"',
+    "state": "STATE",
+    "city": "CITY",
+    "customer_id": '"Customer.ID"',
+    "customer_name": '"Customer.Name"',
+    "product_id": '"Product.ID"',
+    "product_name": '"Product.Name"',
 }
 
 
 SUPPORTED_OPERATORS = {
     "equals": "=",
     "not_equals": "!=",
+    "contains": "LIKE",
     "greater_than": ">",
     "less_than": "<",
     "greater_than_or_equal": ">=",
     "less_than_or_equal": "<=",
+}
+
+
+OPERATOR_ALIASES = {
+    "gt": "greater_than",
+    "gte": "greater_than_or_equal",
+    "lt": "less_than",
+    "lte": "less_than_or_equal",
 }
 
 
@@ -62,6 +84,15 @@ def build_sql(query: SemanticQuery) -> tuple[str, list]:
 
         column = DIMENSION_SQL[dimension]
 
+        if (
+            dimension == query.time_dimension
+            and query.time_granularity is not None
+        ):
+            column = (
+                f"DATE_TRUNC('{query.time_granularity.upper()}', "
+                f"{column})"
+            )
+
         select_parts.append(
             f"{column} AS {dimension}"
         )
@@ -78,7 +109,10 @@ def build_sql(query: SemanticQuery) -> tuple[str, list]:
     # Add filters safely
     for semantic_filter in query.filters:
         member = semantic_filter.member
-        operator = semantic_filter.operator
+        operator = OPERATOR_ALIASES.get(
+            semantic_filter.operator,
+            semantic_filter.operator,
+        )
         values = semantic_filter.values
 
         if member not in DIMENSION_SQL:
@@ -99,11 +133,22 @@ def build_sql(query: SemanticQuery) -> tuple[str, list]:
         column = DIMENSION_SQL[member]
         sql_operator = SUPPORTED_OPERATORS[operator]
 
-        where_parts.append(
-            f"{column} {sql_operator} %s"
-        )
-
-        parameters.append(values[0])
+        if operator == "contains":
+            where_parts.append(f"{column} LIKE %s")
+            parameters.append(f"%{values[0]}%")
+        elif operator == "equals" and len(values) > 1:
+            placeholders = ", ".join(["%s"] * len(values))
+            where_parts.append(f"{column} IN ({placeholders})")
+            parameters.extend(values)
+        elif operator == "not_equals" and len(values) > 1:
+            placeholders = ", ".join(["%s"] * len(values))
+            where_parts.append(f"{column} NOT IN ({placeholders})")
+            parameters.extend(values)
+        else:
+            where_parts.append(
+                f"{column} {sql_operator} %s"
+            )
+            parameters.append(values[0])
 
     sql = (
         f"SELECT {', '.join(select_parts)} "

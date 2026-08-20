@@ -3,7 +3,7 @@
 const SUGGESTIONS = [
   "Show total sales by region",
   "Show total profit by category",
-  "Show quarterly revenue",
+  "Show quarterly revenue by category",
   "Show average sales by category",
   "Show total sales for Africa",
   "Show average sales by segment",

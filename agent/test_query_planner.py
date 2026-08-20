@@ -29,3 +29,13 @@ def test_malformed_dimension_assignment_is_normalized() -> None:
     assert fixed_query.dimensions == []
     assert fixed_query.filters[0].member == "region"
     assert fixed_query.filters[0].values == ["Europe"]
+
+
+def test_top_5_regions_by_profit_is_normalized() -> None:
+    query = plan_query("show top 5 regions by profit")
+
+    assert query.measure == "total_profit"
+    assert query.dimensions == ["region"]
+    assert query.order == "desc"
+    assert query.limit == 5
+    assert query.filters == []

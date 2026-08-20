@@ -188,6 +188,15 @@ def normalize_dimension(dimension: str) -> str:
     return normalized.replace(" ", "_")
 
 
+def is_rank_indicator(value: str) -> bool:
+    """Return True for phrases such as 'top 5', 'bottom 3', or 'top_5'."""
+
+    normalized = normalize_name(value)
+    return bool(
+        re.fullmatch(r"(?:top|bottom)(?:[_-]?\d+)", normalized)
+    )
+
+
 def validate_semantic_query(
     query: SemanticQuery,
 ) -> None:
@@ -307,6 +316,16 @@ def apply_query_rules(
     )
 
     query = normalize_semantic_query(query)
+    query.dimensions = [
+        dimension
+        for dimension in query.dimensions
+        if not is_rank_indicator(dimension)
+    ]
+    query.filters = [
+        semantic_filter
+        for semantic_filter in query.filters
+        if not is_rank_indicator(semantic_filter.member)
+    ]
 
     simple_total_sales_questions = {
         "total sales",
